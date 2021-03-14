@@ -1,0 +1,10 @@
+Problema: Escrever no display de sete segmentos, utilizando os botões PB1 e PB2, enviando e recebendo parâmetros através da porta série.
+Desta forma, construímos 3 ficheiros: Debounce.h, init.c, main.c.
+
+Primeiramente, no init.c, colocámos todas as configurações que vão ser necessárias para o desenvolvimento do display de sete segmentos, Configurações do Oscilador, Timer 0 (8 bits autoreload) e UART1.
+
+No que respeita o main.c, encontra-se o principal código.
+Para a leitura das teclas, implementamos um contador virtual, em que de 10 em 10ms o bit timeout ativa-se e processamos o valor atual da tecla, por debounce. Para tal, utilizamos o método slidding window, em que construímos uma memória das últimas 16 leituras, realizando operações lógicas de forma a contar o número de 0's e 1's existentes.  Passando a exemplificar, a cada flag timeout, vamos shiftar à esquerda, colocando o bit proveniente dos botões no equivalente ao bit menos significativo, a passo que, o bit de saída fica guardado na primeira posição do byte mais significativo do inteiro, (referência às Unions), fazemos a contagem de 1's e processamos esse resultado.
+Assim, caso o contador de 1's seja superior a 8, assumimos que a tecla não foi pressionada, caso se verifique o contrário, a tecla foi pressionada e o bit update, (responsável por fazer o update Display), fica ativo.
+Também, para cada botão, guardamos numa variável temporária o último evento que aconteceu e comparamos com o evento atual.
+No que concerne à porta série, implementamos a UART1, com um baudrate de 115200. Assim, sempre que o bit RI1 é ativado, num caracter "c", fica guardada a informação do SBUFF1, que por conseguinte, vai ser usado para dar update do display.
